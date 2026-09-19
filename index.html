@@ -199,7 +199,6 @@
                 <img src="inheart.png" alt="인하트" class="letter-photo">
  <p>From. 네 분신 쵱니</p><br>
             
-            <!-- 편지 맨 마지막 사진 추가 -->
             <img src="photo1.jpg" alt="사진 1" class="letter-photo">
 
         </div>
@@ -236,6 +235,7 @@
             const isSwipeX = Math.abs(diffX) > 25 && Math.abs(diffX) > Math.abs(diffY);
             const isSwipeY = Math.abs(diffY) > 25 && Math.abs(diffY) > Math.abs(diffX);
 
+            // 열린 상태 제어 (아래로 스와이프할 때만 닫기)
             if (isOpen) {
                 if (isSwipeY && diffY > 0) {
                     closeEnvelope();
@@ -243,6 +243,7 @@
                 return;
             }
 
+            // 좌/우 스와이프 (회전)
             if (isSwipeX) {
                 if (diffX < 0) {
                     currentRotation -= 180;
@@ -253,6 +254,7 @@
                 return;
             }
 
+            // 위로 스와이프할 때만 '앞면' 상태에서 봉투 열기
             if (isSwipeY && diffY < 0) {
                 if (isFrontSide()) {
                     openEnvelope();
@@ -260,11 +262,7 @@
                 return;
             }
 
-            if (!isSwipeX && !isSwipeY) {
-                if (isFrontSide()) {
-                    openEnvelope();
-                }
-            }
+            // 단순 단일 터치는 동작하지 않도록 클릭/터치 조건 제거
         });
 
         function openEnvelope() {
