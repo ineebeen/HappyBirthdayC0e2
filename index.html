@@ -166,6 +166,23 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             display: block;
         }
+
+     /* 사진 2개를 옆으로 나란히 배치는 전용 상자 */
+.letter-photo-group {
+    display: flex;
+    gap: 10px; /* 사진 사이 간격 */
+    margin: 16px 0;
+    width: 100%;
+}
+
+.letter-photo-group .letter-photo {
+    flex: 1; /* 두 사진의 너비를 1:1로 동일하게 나눔 */
+    width: 50%;
+    height: 180px; /* 원하는 높이 고정 (같은 높이로 맞춤) */
+    object-fit: cover; /* 사진 비율이 깨지지 않고 깔끔하게 상자에 맞춤 */
+    margin: 0; /* 기존 마진 제거 */
+}
+     
     </style>
 </head>
 <body>
@@ -196,8 +213,11 @@
 ￼</p><br>
             <p>From. 네 분신 쵱니</p><br>
             
-            <img src="photo1.jpg" class="letter-photo">
-            <img src="photo2.jpg" class="letter-photo">
+            <!-- 사진 2개 나란히 배치하기 -->
+<div class="letter-photo-group">
+    <img src="photo1.jpg" alt="사진 1" class="letter-photo">
+    <img src="photo2.jpg" alt="사진 2" class="letter-photo">
+</div>
         </div>
     </div>
 
