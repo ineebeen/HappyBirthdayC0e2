@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,6 @@
             background-image: url('heart-patterns.png');
             background-repeat: repeat;
             background-position: center;
-            /* 배경 패턴 크기 300px로 변경 */
             background-size: 300px auto;
             display: flex;
             justify-content: center;
@@ -157,32 +156,16 @@
             font-size: 24px;
         }
 
-        /* 편지지에 들어가는 사진 스타일 */
+        /* 사진 잘림 없는 단독 스타일 */
         .letter-photo {
             width: 100%;
-            max-width: 100%;
+            max-height: 350px;
+            object-fit: contain; /* 비율 유지하며 안 잘리게 조정 */
             border-radius: 12px;
-            margin: 16px 0;
+            margin: 20px 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             display: block;
         }
-
-     /* 사진 2개를 옆으로 나란히 배치는 전용 상자 */
-.letter-photo-group {
-    display: flex;
-    gap: 10px; /* 사진 사이 간격 */
-    margin: 16px 0;
-    width: 100%;
-}
-
-.letter-photo-group .letter-photo {
-    flex: 1; /* 두 사진의 너비를 1:1로 동일하게 나눔 */
-    width: 50%;
-    height: 180px; /* 원하는 높이 고정 (같은 높이로 맞춤) */
-    object-fit: cover; /* 사진 비율이 깨지지 않고 깔끔하게 상자에 맞춤 */
-    margin: 0; /* 기존 마진 제거 */
-}
-     
     </style>
 </head>
 <body>
@@ -212,12 +195,6 @@
 생일 세상에서 제~~~일로 축하한다! 사랑혀
 ￼</p><br>
             <p>From. 네 분신 쵱니</p><br>
-            
-            <!-- 사진 2개 나란히 배치하기 -->
-<div class="letter-photo-group">
-    <img src="photo1.jpg" alt="사진 1" class="letter-photo">
-    <img src="photo2.jpg" alt="사진 2" class="letter-photo">
-</div>
         </div>
     </div>
 
@@ -231,6 +208,13 @@
         let startY = 0;
         let isOpen = false;
         let currentRotation = 0;
+
+        // 현재 봉투가 '앞면'을 향해 있는지 판별하는 함수
+        function isFrontSide() {
+            // 360도로 나눈 나머지의 절댓값이 90도 미만이거나 270도 초과일 때 앞면
+            const normalized = Math.abs(currentRotation % 360);
+            return normalized < 90 || normalized > 270;
+        }
 
         envelope.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
@@ -258,9 +242,11 @@
                 return;
             }
 
-            // 2. 위로 스와이프 -> 봉투 열기
+            // 2. 위로 스와이프 -> '앞면'일 때만 봉투 열기
             if (isSwipeY && diffY < 0 && !isOpen) {
-                openEnvelope();
+                if (isFrontSide()) {
+                    openEnvelope();
+                }
                 return;
             }
 
@@ -270,9 +256,11 @@
                 return;
             }
 
-            // 4. 단일 터치 시 -> 봉투 열기
+            // 4. 단일 터치 시 -> '앞면'일 때만 봉투 열기
             if (!isSwipeX && !isSwipeY && !isOpen) {
-                openEnvelope();
+                if (isFrontSide()) {
+                    openEnvelope();
+                }
             }
         });
 
