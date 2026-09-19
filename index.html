@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <!-- 1. 주소창/탭 문구 수정 -->
     <title>최팡만 여시오</title>
     <style>
         * {
@@ -12,8 +11,8 @@
             padding: 0;
         }
         body {
-            /* 2. 외곽 흰 박스 없이 배경 전체를 채움 */
-            background-color: #fce4ec;
+            /* 4. 청민트 색이 아주 연하게 도는 화이트 톤 배경 */
+            background-color: #f0f7f7;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -25,10 +24,10 @@
         /* 3D 스테이지 */
         .stage {
             perspective: 1000px;
-            /* 3. 모바일 화면에서 봉투가 여백 없이 꽉 차도록 크기 확대 */
-            width: 88vw;
-            max-width: 380px;
-            height: 260px;
+            /* 3. 화면 가로에 꽉 차도록 크기 확대 */
+            width: 96vw;
+            max-width: 450px;
+            height: 280px;
             position: relative;
         }
 
@@ -42,8 +41,13 @@
             cursor: pointer;
         }
 
-        .envelope-wrapper.flipped {
+        /* 스와이프 방향에 따른 뒤집기 클래스 */
+        .envelope-wrapper.flipped-right {
             transform: rotateY(180deg);
+        }
+
+        .envelope-wrapper.flipped-left {
+            transform: rotateY(-180deg);
         }
 
         /* 봉투 면 (앞/뒤) */
@@ -66,25 +70,25 @@
             transform: rotateY(180deg);
         }
 
-        /* 4. 열린 봉투 이미지 전환 */
+        /* 열린 봉투 이미지 전환 */
         .envelope-wrapper.opened .front {
             background-image: url('envelope-open.png');
         }
 
-        /* 5. 봉투 열림 후 가운데 'TOUCH!' 문구 */
+        /* 봉투 열림 후 가운데 'TOUCH!' 문구 */
         .touch-prompt {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.92);
-            color: #d81b60;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #00796b;
+            padding: 10px 22px;
+            border-radius: 24px;
+            font-size: 15px;
             font-weight: 800;
             letter-spacing: 1.5px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
             display: none;
             z-index: 10;
             animation: pulse 1.5s infinite ease-in-out;
@@ -101,21 +105,21 @@
             100% { transform: translate(-50%, -50%) scale(1); }
         }
 
-        /* 6. 회색빛 도는 연한 아이보리 색상 편지 모달 및 그림자 효과 */
+        /* 회색빛 도는 연한 아이보리 색상 편지 모달 및 그림자 효과 */
         .letter-full {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #F5F4F0; /* 회색빛 연한 아이보리 */
+            background: #F5F4F0;
             z-index: 100;
             display: none;
             flex-direction: column;
             padding: 70px 28px 50px 28px;
             overflow-y: auto;
             box-sizing: border-box;
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.08); /* 배경 구분을 위한 내부 그림자 */
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.08);
         }
 
         .letter-full.active {
@@ -156,7 +160,7 @@
 
         .letter-content h1 {
             margin-bottom: 24px;
-            color: #d81b60;
+            color: #00796b;
             font-size: 24px;
         }
     </style>
@@ -167,12 +171,11 @@
         <div class="envelope-wrapper" id="envelope">
             <div class="envelope-face front"></div>
             <div class="envelope-face back"></div>
-            <!-- 5. TOUCH! 안내 문구 -->
             <div class="touch-prompt" id="touchPrompt">TOUCH!</div>
         </div>
     </div>
 
-    <!-- 6. 회색빛 연한 아이보리 전체 화면 편지 -->
+    <!-- 전체 화면 편지 -->
     <div class="letter-full" id="fullLetter">
         <div class="close-btn" id="closeBtn">✕</div>
         <div class="letter-content">
@@ -193,8 +196,8 @@
         let startX = 0;
         let startY = 0;
         let isOpen = false;
+        let isFlipped = false;
 
-        // 3. 민감도를 높인 터치 스와이프 감지
         envelope.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
@@ -207,13 +210,21 @@
             const diffX = endX - startX;
             const diffY = endY - startY;
 
-            // 스와이프 여부 확인 (30px 이상 움직인 경우 스와이프로 판단)
             const isSwipeX = Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY);
             const isSwipeY = Math.abs(diffY) > 30 && Math.abs(diffY) > Math.abs(diffX);
 
-            // 1. 좌/우 스와이프 -> 닫힌 상태일 때 봉투 뒷면/앞면 뒤집기
+            // 1. 좌/우 스와이프 (손가락 방향대로 회전)
             if (isSwipeX && !isOpen) {
-                envelope.classList.toggle('flipped');
+                if (diffX > 0) {
+                    // 오른쪽으로 스와이프
+                    envelope.classList.remove('flipped-left');
+                    envelope.classList.toggle('flipped-right');
+                } else {
+                    // 왼쪽으로 스와이프
+                    envelope.classList.remove('flipped-right');
+                    envelope.classList.toggle('flipped-left');
+                }
+                isFlipped = envelope.classList.contains('flipped-right') || envelope.classList.contains('flipped-left');
                 return;
             }
 
@@ -223,42 +234,36 @@
                 return;
             }
 
-            // 3. 아래로 스와이프 -> 열린 봉투 닫기
+            // 2. 열린 상태에서 아래로 스와이프할 때만 -> 닫힌 봉투로 돌아가기
             if (isSwipeY && diffY > 0 && isOpen) {
                 closeEnvelope();
                 return;
             }
 
-            // 4. 단순 터치 동작 (스와이프가 아닐 때)
-            if (!isSwipeX && !isSwipeY) {
-                if (!isOpen) {
-                    openEnvelope();
-                } else {
-                    closeEnvelope();
-                }
+            // 닫힌 상태에서 클릭/터치할 때만 봉투 열기
+            if (!isSwipeX && !isSwipeY && !isOpen) {
+                openEnvelope();
             }
         });
 
-        // 봉투 열기 함수
         function openEnvelope() {
-            envelope.classList.remove('flipped');
+            envelope.classList.remove('flipped-right', 'flipped-left');
             envelope.classList.add('opened');
             isOpen = true;
+            isFlipped = false;
         }
 
-        // 봉투 닫기 함수
         function closeEnvelope() {
             envelope.classList.remove('opened');
             isOpen = false;
         }
 
-        // 5. TOUCH! 문구 터치 시 편지 모달 창 열기
+        // TOUCH! 문구 클릭 시 편지지가 열림 (이벤트 중첩 방지)
         touchPrompt.addEventListener('click', (e) => {
-            e.stopPropagation(); // 봉투 클릭 이벤트 중복 발생 방지
+            e.stopPropagation();
             fullLetter.classList.add('active');
         });
 
-        // 6. X 버튼 터치 시 편지 모달 창 닫기
         closeBtn.addEventListener('click', () => {
             fullLetter.classList.remove('active');
         });
