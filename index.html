@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>너를 위한 생일 편지 💌</title>
+    <!-- 1. 주소창/탭 문구 수정 -->
+    <title>최팡만 여시오</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,30 +12,33 @@
             padding: 0;
         }
         body {
+            /* 2. 외곽 흰 박스 없이 배경 전체를 채움 */
             background-color: #fce4ec;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
-            font-family: 'Apple SD Gothic Neo', sans-serif;
+            font-family: 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        /* 3D 회전 및 원근감 설정 */
+        /* 3D 스테이지 */
         .stage {
             perspective: 1000px;
-            width: 300px;
-            height: 200px;
+            /* 3. 모바일 화면에서 봉투가 여백 없이 꽉 차도록 크기 확대 */
+            width: 88vw;
+            max-width: 380px;
+            height: 260px;
             position: relative;
         }
 
-        /* 편지 봉투 컨테이너 */
+        /* 편지 봉투 전체 래퍼 */
         .envelope-wrapper {
             width: 100%;
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s ease, top 0.6s ease;
+            transition: transform 0.5s ease;
             cursor: pointer;
         }
 
@@ -42,7 +46,7 @@
             transform: rotateY(180deg);
         }
 
-        /* 봉투 앞/뒷면 공통 */
+        /* 봉투 면 (앞/뒤) */
         .envelope-face {
             position: absolute;
             width: 100%;
@@ -62,49 +66,56 @@
             transform: rotateY(180deg);
         }
 
-        /* 위로 스와이프했을 때 열린 이미지로 변경 */
+        /* 4. 열린 봉투 이미지 전환 */
         .envelope-wrapper.opened .front {
             background-image: url('envelope-open.png');
         }
 
-        /* 접힌 편지지 (봉투 안에서 위로 올라오는 부분) */
-        .letter-folded {
+        /* 5. 봉투 열림 후 가운데 'TOUCH!' 문구 */
+        .touch-prompt {
             position: absolute;
-            top: 20px;
-            left: 5%;
-            width: 90%;
-            height: 160px;
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.6s ease;
-            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.92);
+            color: #d81b60;
+            padding: 8px 18px;
+            border-radius: 20px;
             font-size: 14px;
-            color: #888;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 10;
+            animation: pulse 1.5s infinite ease-in-out;
+            pointer-events: auto;
         }
 
-        .envelope-wrapper.opened .letter-folded {
-            transform: translateY(-120px);
-            z-index: 2;
+        .envelope-wrapper.opened .touch-prompt {
+            display: block;
         }
 
-        /* 전체 화면 편지지 모달 */
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.08); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* 6. 회색빛 도는 연한 아이보리 색상 편지 모달 및 그림자 효과 */
         .letter-full {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #ffffff;
+            background: #F5F4F0; /* 회색빛 연한 아이보리 */
             z-index: 100;
             display: none;
             flex-direction: column;
-            padding: 60px 25px 40px 25px;
+            padding: 70px 28px 50px 28px;
             overflow-y: auto;
             box-sizing: border-box;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.08); /* 배경 구분을 위한 내부 그림자 */
         }
 
         .letter-full.active {
@@ -114,33 +125,39 @@
         /* X 닫기 버튼 */
         .close-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 36px;
-            height: 36px;
-            background: rgba(0,0,0,0.05);
+            top: 24px;
+            right: 24px;
+            width: 38px;
+            height: 38px;
+            background: rgba(0, 0, 0, 0.06);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 20px;
             font-weight: bold;
-            color: #333;
+            color: #444;
             cursor: pointer;
             z-index: 101;
+            transition: background 0.2s ease;
         }
 
-        /* 편지 본문 텍스트 스타일 */
+        .close-btn:active {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* 편지 본문 스타일 */
         .letter-content {
             font-size: 16px;
             line-height: 1.8;
-            color: #2c3e50;
+            color: #2b2b2b;
             word-break: keep-all;
         }
 
         .letter-content h1 {
-            margin-bottom: 20px;
-            color: #e91e63;
+            margin-bottom: 24px;
+            color: #d81b60;
+            font-size: 24px;
         }
     </style>
 </head>
@@ -150,27 +167,26 @@
         <div class="envelope-wrapper" id="envelope">
             <div class="envelope-face front"></div>
             <div class="envelope-face back"></div>
-            <div class="letter-folded" id="foldedLetter">
-                ✉️ 터치해서 편지 펼치기
-            </div>
+            <!-- 5. TOUCH! 안내 문구 -->
+            <div class="touch-prompt" id="touchPrompt">TOUCH!</div>
         </div>
     </div>
 
-    <!-- 전체 화면 편지지 -->
+    <!-- 6. 회색빛 연한 아이보리 전체 화면 편지 -->
     <div class="letter-full" id="fullLetter">
         <div class="close-btn" id="closeBtn">✕</div>
         <div class="letter-content">
             <h1>🎉 생일 축하해!</h1>
-            <p>소중한 친구에게,</p><br>
+            <p>사랑하는 최팡만에게,</p><br>
             <p>여기에 준비한 생일 편지 텍스트를 작성하시면 됩니다.</p><br>
-            <p>내용이 길어지면 모바일 화면에서 손가락으로 위아래 스크롤을 하면서 읽을 수 있습니다.</p><br>
-            <p>오늘 하루 행복하고 즐거운 일만 가득하길 바랄게!</p>
+            <p>내용이 길어지면 모바일 화면에서 손가락으로 위아래 스크롤을 하면서 편하게 읽을 수 있습니다.</p><br>
+            <p>오늘 하루 세상에서 가장 feliz하고 즐거운 날이 되길 바라!</p>
         </div>
     </div>
 
     <script>
         const envelope = document.getElementById('envelope');
-        const foldedLetter = document.getElementById('foldedLetter');
+        const touchPrompt = document.getElementById('touchPrompt');
         const fullLetter = document.getElementById('fullLetter');
         const closeBtn = document.getElementById('closeBtn');
 
@@ -178,11 +194,11 @@
         let startY = 0;
         let isOpen = false;
 
-        // 터치 이벤트 (모바일 스와이프 감지)
+        // 3. 민감도를 높인 터치 스와이프 감지
         envelope.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
-        });
+        }, { passive: true });
 
         envelope.addEventListener('touchend', (e) => {
             const endX = e.changedTouches[0].clientX;
@@ -191,32 +207,60 @@
             const diffX = endX - startX;
             const diffY = endY - startY;
 
-            // 좌/우 스와이프 (100px 이상 움직였을 때) -> 봉투 뒷면 전환
-            if (Math.abs(diffX) > 100 && Math.abs(diffY) < 50 && !isOpen) {
+            // 스와이프 여부 확인 (30px 이상 움직인 경우 스와이프로 판단)
+            const isSwipeX = Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY);
+            const isSwipeY = Math.abs(diffY) > 30 && Math.abs(diffY) > Math.abs(diffX);
+
+            // 1. 좌/우 스와이프 -> 닫힌 상태일 때 봉투 뒷면/앞면 뒤집기
+            if (isSwipeX && !isOpen) {
                 envelope.classList.toggle('flipped');
+                return;
             }
-            
-            // 위로 스와이프 (위쪽으로 80px 이상) -> 봉투 열림 및 편지지 올라옴
-            if (diffY < -80 && Math.abs(diffX) < 50 && !isOpen) {
-                envelope.classList.remove('flipped');
-                envelope.classList.add('opened');
-                isOpen = true;
+
+            // 2. 위로 스와이프 -> 봉투 열기
+            if (isSwipeY && diffY < 0 && !isOpen) {
+                openEnvelope();
+                return;
+            }
+
+            // 3. 아래로 스와이프 -> 열린 봉투 닫기
+            if (isSwipeY && diffY > 0 && isOpen) {
+                closeEnvelope();
+                return;
+            }
+
+            // 4. 단순 터치 동작 (스와이프가 아닐 때)
+            if (!isSwipeX && !isSwipeY) {
+                if (!isOpen) {
+                    openEnvelope();
+                } else {
+                    closeEnvelope();
+                }
             }
         });
 
-        // 위로 올라온 접힌 편지지 터치 시 전체화면 확장
-        foldedLetter.addEventListener('click', (e) => {
-            if (isOpen) {
-                e.stopPropagation();
-                fullLetter.classList.add('active');
-            }
-        });
+        // 봉투 열기 함수
+        function openEnvelope() {
+            envelope.classList.remove('flipped');
+            envelope.classList.add('opened');
+            isOpen = true;
+        }
 
-        // X 버튼 클릭 시 초기 상태로 복구
-        closeBtn.addEventListener('click', () => {
-            fullLetter.classList.remove('active');
+        // 봉투 닫기 함수
+        function closeEnvelope() {
             envelope.classList.remove('opened');
             isOpen = false;
+        }
+
+        // 5. TOUCH! 문구 터치 시 편지 모달 창 열기
+        touchPrompt.addEventListener('click', (e) => {
+            e.stopPropagation(); // 봉투 클릭 이벤트 중복 발생 방지
+            fullLetter.classList.add('active');
+        });
+
+        // 6. X 버튼 터치 시 편지 모달 창 닫기
+        closeBtn.addEventListener('click', () => {
+            fullLetter.classList.remove('active');
         });
     </script>
 </body>
