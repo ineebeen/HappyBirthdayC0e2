@@ -15,7 +15,7 @@
             background-image: url('heart-patterns.png');
             background-repeat: repeat;
             background-position: center;
-            background-size: 180px auto; /* 패턴 이미지 크기 조정 */
+            background-size: 220px auto;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -39,17 +39,9 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
+            /* 회전 부드러움 및 애니메이션 설정 */
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: pointer;
-        }
-
-        /* 스와이프 방향별 회전 클래스 */
-        .envelope-wrapper.flipped-left {
-            transform: rotateY(-180deg);
-        }
-
-        .envelope-wrapper.flipped-right {
-            transform: rotateY(180deg);
         }
 
         /* 봉투 면 (앞/뒤) */
@@ -198,6 +190,7 @@
         let startX = 0;
         let startY = 0;
         let isOpen = false;
+        let currentRotation = 0; // 누적 회전 각도 변수
 
         envelope.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
@@ -214,21 +207,16 @@
             const isSwipeX = Math.abs(diffX) > 25 && Math.abs(diffX) > Math.abs(diffY);
             const isSwipeY = Math.abs(diffY) > 25 && Math.abs(diffY) > Math.abs(diffX);
 
-            // 1. 좌/우 스와이프 제어
+            // 1. 누적 각도 방식의 양방향 자연스러운 좌/우 회전
             if (isSwipeX) {
                 if (diffX < 0) {
-                    if (envelope.classList.contains('flipped-right')) {
-                        envelope.classList.remove('flipped-right');
-                    } else {
-                        envelope.classList.add('flipped-left');
-                    }
+                    // 우 -> 좌 스와이프: 손가락 따라 왼쪽으로 180도 추가 회전
+                    currentRotation -= 180;
                 } else {
-                    if (envelope.classList.contains('flipped-left')) {
-                        envelope.classList.remove('flipped-left');
-                    } else {
-                        envelope.classList.add('flipped-right');
-                    }
+                    // 좌 -> 우 스와이프: 손가락 따라 오른쪽으로 180도 추가 회전
+                    currentRotation += 180;
                 }
+                envelope.style.transform = `rotateY(${currentRotation}deg)`;
                 return;
             }
 
@@ -251,7 +239,9 @@
         });
 
         function openEnvelope() {
-            envelope.classList.remove('flipped-left', 'flipped-right');
+            // 봉투가 열릴 때는 각도를 정면(0도)으로 정렬 후 열림
+            currentRotation = 0;
+            envelope.style.transform = `rotateY(0deg)`;
             envelope.classList.add('opened');
             isOpen = true;
         }
